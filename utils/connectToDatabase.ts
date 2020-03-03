@@ -11,7 +11,9 @@ async function connectToDatabase(): Promise<Db | null> {
   let uri = process.env.MONGODB_URI;
 
   // Strip " from start/end of URI
-  uri = uri?.slice(1, uri.length - 1);
+  if (uri.startsWith('"') && uri.endsWith('"')) {
+    uri = uri?.slice(1, uri.length - 1);
+  }
 
   // If the database connection is cached,
   // use it instead of creating a new connection

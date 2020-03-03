@@ -1,8 +1,14 @@
+import Cors from "micro-cors";
+
 import connectToDatabase from "../../utils/connectToDatabase";
 import getCallSession from "../../utils/getCallSession";
 import { SessionCacheDetails } from "../../types";
 
-module.exports = async (req, res) => {
+const cors = Cors({
+  allowMethods: ["GET", "HEAD"]
+});
+
+module.exports = cors(async (req, res) => {
   // Get a database connection, cached or otherwise,
   // using the connection string environment variable as the argument
   const db = await connectToDatabase();
@@ -27,4 +33,4 @@ module.exports = async (req, res) => {
 
   // Respond with a JSON string of all users in the collection
   res.status(200).json({ previousSession: existingSession });
-};
+});

@@ -1,7 +1,13 @@
+import Cors from "micro-cors";
+
 import connectToDatabase from "../../utils/connectToDatabase";
-import { Question, QuestionDetails, RichQuestion } from "../../types";
+import { Question, RichQuestion } from "../../types";
 import getCallSession from "../../utils/getCallSession";
 import setCallSession from "../../utils/setCallSession";
+
+const cors = Cors({
+  allowMethods: ["GET", "HEAD"]
+});
 
 const QuestionType_Name = "Name";
 const QuestionType_Number = "Number";
@@ -79,7 +85,7 @@ async function getClientQuestions(
   });
 }
 
-module.exports = async (req, res) => {
+module.exports = cors(async (req, res) => {
   const query = req.query;
   const {
     ClientId,
@@ -138,10 +144,13 @@ module.exports = async (req, res) => {
   //
   // Get (next) question
   //
-  const thisQuestionIndex =
-    thisQuestionId === undefined || thisQuestionId === null
-      ? -1
-      : clientQuestions.findIndex(q => q.QuestionId === thisQuestionId);
+  const lastAnswerQuestionId =
+    thisQuestionId || existingSession.Answers.length > 0
+      ? existingSession.Answers[existingSession.Answers.length - 1].QuestionId
+      : -1;
+  const thisQuestionIndex = clientQuestions.findIndex(
+    q => q.QuestionId === lastAnswerQuestionId
+  );
 
   // Only increment when it's first, or there's an answer we're submitting
   const newQuestionIndex =
@@ -158,4 +167,4 @@ module.exports = async (req, res) => {
     Answers: existingSession.Answers,
     ExistingSession: existingSession
   });
-};
+});
